@@ -9,15 +9,15 @@ pub struct Heed<'a> {
 }
 
 impl Heed<'_> {
-    pub fn new<'a>(env: Env, wtxn: &'a mut RwTxn<'a>) -> anyhow::Result<&'a mut Heed<'a>> {
+    pub fn new<'a>(env: Env, wtxn: &'a mut RwTxn<'a>) -> anyhow::Result<Heed> {
         let db: Database<Str, U32<byteorder::NativeEndian>> = env.create_database(wtxn, None)?;
 
-        return Ok(&mut Heed { wtxn, db })
+        return Ok(Heed { wtxn, db })
     }
 }
 
-impl Storage for &mut Heed<'_> {
-    async fn create_workflow(&mut self, name: &str) -> anyhow::Result<()> {
+impl Storage for Heed<'_> {
+    fn create_workflow(&mut self, name: &str) -> anyhow::Result<()> {
         self.db.put(&mut self.wtxn, name, &7)?;
         Ok(())
     }
