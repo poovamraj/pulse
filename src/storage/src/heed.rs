@@ -1,7 +1,7 @@
 use heed::types::Str;
 use heed::{Database, byteorder, RwTxn, Env};
 use heed::types::*;
-use crate::storage::Storage;
+use crate::Storage;
 
 pub struct Heed<'a> {
     wtxn: RwTxn<'a>,
@@ -9,7 +9,7 @@ pub struct Heed<'a> {
 }
 
 impl Heed<'_> {
-    pub fn new(env: Env, mut wtxn: RwTxn) -> anyhow::Result<Heed> {
+    pub fn new(env: Env, mut wtxn: RwTxn) -> anyhow::Result<impl Storage + '_> {
         let db: Database<Str, U32<byteorder::NativeEndian>> = env.create_database(&mut wtxn, None)?;
 
         return Ok(Heed { wtxn, db })
