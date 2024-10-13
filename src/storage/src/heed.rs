@@ -1,3 +1,4 @@
+use std::fmt::format;
 use heed::types::Str;
 use heed::{Database, byteorder, RwTxn, Env, Error};
 use heed::types::*;
@@ -30,8 +31,20 @@ impl Storage for Heed<'_> {
         Ok(())
     }
 
-    fn get_workflow(&self, name: &str) -> anyhow::Result<Option<Workflow>> {
-        let db_result = self.db.get(&self.wtxn, name)?;
+    fn get_non_queued_workflow(&self, id: &str) -> anyhow::Result<Option<Workflow>> {
+        let db_result = self.db.get(&self.wtxn, &format!("NQ.{}", id))?;
+        return match db_result {
+            None => {
+                Ok(None)
+            }
+            Some(result) => {
+                serde_json::from_str(result).map_err(anyhow::Error::from)
+            }
+        }
+    }
+
+    fn get_queued_workflow(&self, queue_id: &str, id: &str) -> anyhow::Result<Option<Workflow>> {
+        let db_result = self.db.get(&self.wtxn, &format!("{}.{}", queue_id, id))?;
         return match db_result {
             None => {
                 Ok(None)
