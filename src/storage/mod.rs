@@ -1,4 +1,3 @@
-use std::fmt::Error;
 use ::heed::{Env, RwTxn};
 use crate::storage::heed::Heed;
 mod heed;
@@ -9,6 +8,6 @@ pub trait Storage {
     fn get_workflow(&self, name: &str) -> anyhow::Result<Option<u32>>;
 }
 
-pub fn new_heed(env: Env, wtxn: &mut RwTxn) -> anyhow::Result<impl Storage> {
+pub fn new_heed<'a>(env: Env, wtxn: &'a mut RwTxn<'a>) -> anyhow::Result<impl Storage + 'a> {
     return Heed::new(env, wtxn)
 }
