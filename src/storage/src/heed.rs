@@ -31,8 +31,8 @@ impl Storage for Heed<'_> {
         Ok(())
     }
 
-    fn get_non_queued_workflow(&self, id: &str) -> anyhow::Result<Option<Workflow>> {
-        let db_result = self.db.get(&self.wtxn, &format!("NQ.{}", id))?;
+    fn get_queued_workflow(&self, queue_id: &str, id: &str) -> anyhow::Result<Option<Workflow>> {
+        let db_result = self.db.get(&self.wtxn, &format!("{}.{}", queue_id, id))?;
         return match db_result {
             None => {
                 Ok(None)
@@ -43,8 +43,8 @@ impl Storage for Heed<'_> {
         }
     }
 
-    fn get_queued_workflow(&self, queue_id: &str, id: &str) -> anyhow::Result<Option<Workflow>> {
-        let db_result = self.db.get(&self.wtxn, &format!("{}.{}", queue_id, id))?;
+    fn get_non_queued_workflow(&self, id: &str) -> anyhow::Result<Option<Workflow>> {
+        let db_result = self.db.get(&self.wtxn, &format!("NQ.{}", id))?;
         return match db_result {
             None => {
                 Ok(None)
