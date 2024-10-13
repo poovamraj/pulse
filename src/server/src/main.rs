@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use heed::EnvOpenOptions;
@@ -24,8 +25,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         id: ulid,
         status: WorkflowStatus::Completed,
         queue_id: None,
-        state: "".to_string(),
-        error: "".to_string(),
+        state: HashMap::new(),
+        error: HashMap::new(),
     }).expect("Cannot Write");
     let result = heed.get_workflow(&ulid.to_string()).expect("Cannot Read");
     println!("{:?}", result);

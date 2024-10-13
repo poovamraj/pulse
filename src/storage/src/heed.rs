@@ -21,7 +21,12 @@ impl Heed<'_> {
 impl Storage for Heed<'_> {
     fn create_workflow(&mut self, workflow: Workflow) -> anyhow::Result<()> {
         let serialized = serde_json::to_string(&workflow)?;
-        self.db.put(&mut self.wtxn, &workflow.id.to_string(), &serialized)?;
+        let key = if let Some(queue_id) = workflow.queue_id {
+            format!("{}.{}", queue_id, workflow.id.to_string())
+        } else {
+            format!("NQ.{}", workflow.id.to_string())
+        };
+        self.db.put(&mut self.wtxn, &key, &serialized)?;
         Ok(())
     }
 

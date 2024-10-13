@@ -1,4 +1,4 @@
-use heed::types::Str;
+use std::collections::HashMap;
 use ulid::Ulid;
 use serde::{Deserialize, Serialize};
 
@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 #[serde(tag="mode")]
 enum QueueMode {
     Sequential,
-    Parallel { max_executions: u64 }
+    Parallel { max_concurrent_executions: u64 }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -21,8 +21,8 @@ pub struct Workflow {
     pub id: Ulid,
     pub status: WorkflowStatus,
     pub queue_id: Option<Ulid>,
-    pub state: String,
-    pub error: String,
+    pub state: HashMap<String, String>,
+    pub error: HashMap<String, String>,
 }
 
 
