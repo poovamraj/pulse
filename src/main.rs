@@ -4,16 +4,13 @@ use heed::EnvOpenOptions;
 use crate::storage::Storage;
 
 mod storage;
-
 fn main() {
     let path = Path::new("target").join("heed.mdb");
     fs::create_dir_all(&path).expect("failure creating dir");
     let env = unsafe { EnvOpenOptions::new().open(&path) }.expect("failure with env");
-    // We open the default unnamed database
-    let mut wtxn = env.write_txn().expect("failure with write");
+    let mut wtxn = env.write_txn().expect("failure with write"); // We open the default unnamed database
+    let mut heed = storage::new_heed(env.clone(), wtxn).expect("Cannot create");
 
-
-    let mut heed = storage::new_heed(env.clone(), &mut wtxn).expect("Cannot create");
     heed.create_workflow("test").expect("Cannot Write");
     let result = heed.get_workflow("test").expect("Cannot Read");
     println!("{:?}", result);
