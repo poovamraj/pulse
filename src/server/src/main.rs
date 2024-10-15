@@ -1,16 +1,17 @@
 use std::collections::HashMap;
+
 use ulid::Ulid;
-use storage::new_heed;
-use storage::records::Workflow;
-use storage::Storage;
+
+use storage::{create_workflow, get_non_queued_workflow, new_kv, Repository};
 use storage::records::*;
+use storage::records::Workflow;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut storage = new_heed()?;
-
+    let mut storage = new_kv()?;
     let ulid = Ulid::new();
-    storage.create_workflow(Workflow {
+
+    create_workflow(&mut storage, Workflow {
         name: "".to_string(),
         id: ulid,
         status: WorkflowStatus::Completed,
@@ -18,7 +19,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         state: HashMap::new(),
         error: HashMap::new(),
     }).expect("Cannot Write");
-    let result = storage.get_non_queued_workflow(&ulid.to_string()).expect("Cannot Read");
+
+    let result = get_non_queued_workflow(&storage, &ulid.to_string()).expect("Cannot Read");
     println!("{:?}", result);
+    let not_found = get_non_queued_workflow(&storage, "asdasdasda").expect("failed on no data");
+    println!("{:?}", not_found);
     Ok(())
 }

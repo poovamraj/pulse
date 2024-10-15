@@ -5,7 +5,7 @@ use heed::EnvOpenOptions;
 use ulid::Ulid;
 use storage::new_heed;
 use storage::records::{Workflow, WorkflowStatus};
-use storage::Storage;
+use storage::Repository;
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let path = Path::new("target").join("heed.mdb");
