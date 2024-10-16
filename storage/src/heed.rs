@@ -32,7 +32,7 @@ impl KeyValue<String, String> for Heed {
 
 impl Heed {
     pub fn new() -> anyhow::Result<Heed> {
-        let path = Path::new("target").join("heed.mdb");
+        let path = Path::new("../../target").join("heed.mdb");
         fs::create_dir_all(&path).expect("failure creating dir");
         let env = unsafe {
             EnvOpenOptions::new().map_size(2000 * 1024 * 1024)
