@@ -1,32 +1,27 @@
-use std::fs;
-use std::path::Path;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use heed::EnvOpenOptions;
+use std::collections::HashMap;
+
+use criterion::{Criterion, criterion_group, criterion_main};
 use ulid::Ulid;
-use storage::new_heed;
+
+use storage::{create_workflow, get_non_queued_workflow, new_kv, Repository};
 use storage::records::{Workflow, WorkflowStatus};
-use storage::Repository;
 
 pub fn criterion_benchmark(c: &mut Criterion) {
-    let path = Path::new("target").join("heed.mdb");
-    fs::create_dir_all(&path).expect("failure creating dir");
-    let env = unsafe { EnvOpenOptions::new().map_size(2000 * 1024 * 1024) // 10MB
-        .max_dbs(3000).open(&path) }.expect("failure with env");
-
-    let wtxn = env.write_txn().expect("failure with write"); // We open the default unnamed database
-    let mut heed = new_heed(env.clone(), wtxn).expect("Cannot create");
+    let mut kv = new_kv().expect("Can't create KV");
 
     c.bench_function("benchmark running heed storage write and get", |b| b.iter(|| {
+        let map = HashMap::new();
+        let map1 = HashMap::new();
         let ulid = Ulid::new();
-        heed.create_workflow(Workflow {
+        create_workflow(&mut kv, Workflow {
             name: "".to_string(),
             id: ulid,
             status: WorkflowStatus::Completed,
             queue_id: None,
-            state: "".to_string(),
-            error: "".to_string(),
+            state: map,
+            error: map1,
         }).expect("Cannot Write");
-        let result = heed.get_workflow(&ulid.to_string()).expect("Cannot Read");
+        let result = get_non_queued_workflow(&kv, &ulid.to_string()).expect("Cannot Read");
     }));
 }
 
