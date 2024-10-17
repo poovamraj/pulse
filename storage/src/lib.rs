@@ -1,5 +1,7 @@
 use std::ops::Deref;
 
+use anyhow::Error;
+
 use crate::heed::{Heed, KeyValue};
 use crate::records::Workflow;
 
@@ -15,6 +17,9 @@ pub trait Repository {
 }
 
 pub fn create_workflow(kv: &mut impl KeyValue<String, String>, workflow: Workflow) -> anyhow::Result<()> {
+    if workflow.name.is_empty() {
+        return Err(Error::msg("workflow name cannot be empty"));
+    }
     let serialized = serde_json::to_string(&workflow)?;
     let key = if let Some(queue_id) = workflow.queue_id {
         format!("{}.{}", queue_id, workflow.id.to_string())
@@ -121,5 +126,19 @@ mod test {
             state: Default::default(),
             error: Default::default(),
         }).expect("TODO: panic message");
+    }
+
+    #[test]
+    fn test_name_is_not_empty() {
+        let mut mock: MockKeyValue<String, String> = MockKeyValue::new();
+        let Err(err) = create_workflow(&mut mock, Workflow {
+            name: "".to_string(),
+            id: Ulid::from(2090478060269053672559017708549633684),
+            status: WorkflowStatus::Pending,
+            queue_id: None,
+            state: Default::default(),
+            error: Default::default(),
+        }) else { panic!("shouldn't happen") };
+        assert_eq!(err.to_string(), "workflow name cannot be empty")
     }
 }
