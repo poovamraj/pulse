@@ -3,12 +3,14 @@ use std::path::Path;
 
 use heed::{Database, Env, EnvOpenOptions};
 use heed::types::Str;
+use mockall::automock;
 
 pub struct Heed {
     db: Database<Str, Str>,
     env: Env,
 }
 
+#[automock]
 pub trait KeyValue<K, V> {
     fn put(&mut self, key: K, value: V) -> anyhow::Result<()>;
 

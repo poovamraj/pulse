@@ -1,21 +1,22 @@
 use std::collections::HashMap;
-use ulid::Ulid;
+
 use serde::{Deserialize, Serialize};
+use ulid::Ulid;
 
 #[derive(Serialize, Deserialize)]
-#[serde(tag="mode")]
+#[serde(tag = "mode")]
 enum QueueMode {
     Sequential,
-    Parallel { max_concurrent_executions: u64 }
+    Parallel { max_concurrent_executions: u64 },
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Queue {
     id: Ulid,
-    mode: QueueMode
+    mode: QueueMode,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct Workflow {
     pub name: String,
     pub id: Ulid,
@@ -26,11 +27,11 @@ pub struct Workflow {
 }
 
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(tag="in")]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[serde(tag = "in")]
 pub enum WorkflowStatus {
     Pending,
     Running,
     Completed,
-    Failed
+    Failed,
 }
